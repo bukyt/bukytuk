@@ -153,14 +153,15 @@ export default function ForumPage() {
 
   return (
     <main className="min-h-screen bg-black text-white p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         <h1 className="text-3xl font-black mb-8 border-b border-gray-900 pb-4 italic tracking-tighter">Nypeldusfoorum</h1>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-1 order-2 md:order-1">
+        <div className="flex gap-8">
+          {/* Left sidebar - 20% */}
+          <div className="w-1/5">
             <form onSubmit={handlePost} className="sticky top-8 flex flex-col gap-4 bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-2xl">
               <h3 className="font-bold text-lg text-green-500">Post Something</h3>
-              <input className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none transition-colors" value={title} onChange={e => setTitle(e.target.value)} placeholder="Subject" required />
-              <textarea className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none h-32 transition-colors resize-none" value={content} onChange={e => setContent(e.target.value)} placeholder="Message content..." required />
+              <input className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none transition-colors text-sm" value={title} onChange={e => setTitle(e.target.value)} placeholder="Subject" required />
+              <textarea className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none h-24 transition-colors resize-none text-sm" value={content} onChange={e => setContent(e.target.value)} placeholder="Message..." required />
               <input 
                 type="file" 
                 multiple 
@@ -170,13 +171,15 @@ export default function ForumPage() {
               />
               {files.length > 0 && (
                 <div className="text-xs text-green-400">
-                  {files.length} file(s) selected
+                  {files.length} file(s)
                 </div>
               )}
               <button className="p-2 bg-green-600 rounded font-bold hover:bg-green-500 text-black transition-all uppercase text-xs tracking-widest">Broadcast</button>
             </form>
           </div>
-          <div className="md:col-span-2 order-1 md:order-2">
+          
+          {/* Right content - 80% */}
+          <div className="flex-1">
             <div className="mb-4 flex gap-2 bg-gray-900 p-3 rounded-xl border border-gray-800">
               <button
                 onClick={() => setSortBy("new")}
@@ -228,7 +231,7 @@ export default function ForumPage() {
             {/* Media Display */}
             {selectedPost.media && selectedPost.media.length > 0 && (
               <div className="mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   {selectedPost.media.map((m: any) => {
                     const isImage = m.mimetype.startsWith("image/");
                     const isVideo = m.mimetype.startsWith("video/");
@@ -239,7 +242,7 @@ export default function ForumPage() {
                           key={m.id}
                           src={m.filepath} 
                           alt={m.filename}
-                          className="max-w-full rounded border border-gray-700 hover:border-gray-500 transition-colors"
+                          className="w-full rounded border border-gray-700 hover:border-gray-500 transition-colors"
                         />
                       );
                     } else if (isVideo) {
@@ -248,7 +251,7 @@ export default function ForumPage() {
                           key={m.id}
                           src={m.filepath}
                           controls
-                          className="max-w-full rounded border border-gray-700"
+                          className="w-full h-auto max-h-[600px] rounded border border-gray-700 hover:border-gray-500 transition-colors"
                         />
                       );
                     } else {
