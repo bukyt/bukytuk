@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const val = Number(value);
 
     if (postId) {
-      const vote = await prisma.postVote.upsert({
+      const vote = await (prisma as any).postVote.upsert({
         where: { userId_postId: { userId: uId, postId: Number(postId) } },
         update: { value: val },
         create: { userId: uId, postId: Number(postId), value: val },
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (replyId) {
-      const vote = await prisma.replyVote.upsert({
+      const vote = await (prisma as any).replyVote.upsert({
         where: { userId_replyId: { userId: uId, replyId: Number(replyId) } },
         update: { value: val },
         create: { userId: uId, replyId: Number(replyId), value: val },

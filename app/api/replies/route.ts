@@ -9,16 +9,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const reply = await prisma.reply.create({
+    const reply = await (prisma as any).reply.create({
       data: {
         content,
         postId: Number(postId),
         authorId: Number(authorId),
-        parentId: parentId ? Number(parentId) : null,
+        parentId: parentId ? Number(parentId) : undefined,
       },
       include: {
         author: { select: { username: true } },
-        votes: true,
+        replies: true,
       },
     });
 

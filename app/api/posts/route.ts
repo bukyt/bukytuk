@@ -3,19 +3,22 @@ import { prisma } from "@/lib/db";
 
 // Recursively fetch nested replies
 async function getRepliesWithNested(parentId: number | null, postId: number): Promise<any[]> {
-  const replies = await prisma.reply.findMany({
+  const replies = await (prisma as any).reply.findMany({
     where: {
       postId,
       parentId,
     },
     include: {
       author: { select: { username: true } },
-      votes: true,
+      replies: true,
     },
   });
 
   // Recursively fetch replies to each reply
   for (const reply of replies) {
+    if (!reply.replies) {
+      reply.replies = [];
+    }
     reply.replies = await getRepliesWithNested(reply.id, postId);
   }
 
@@ -24,13 +27,13 @@ async function getRepliesWithNested(parentId: number | null, postId: number): Pr
 
 export async function GET() {
   try {
-    const posts = await prisma.post.findMany({
+    const posts = (await (prisma as any).post.findMany({
       include: {
         author: { select: { username: true } },
         votes: true,
         media: true,
       },
-    });
+    })) as any[];
 
     // Manually fetch nested replies for each post
     for (const post of posts) {
@@ -47,12 +50,11 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const { title, content, authorId } = await req.json();
-    const post = await prisma.post.create({
+    const post = await (prisma as any).post.create({
       data: { title, content, authorId: Number(authorId) },
       include: {
         author: true,
         votes: true,
-        replies: true,
         media: true,
       },
     });

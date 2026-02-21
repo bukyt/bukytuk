@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       }
 
       // Save to database
-      const media = await prisma.media.create({
+      const media = await (prisma as any).media.create({
         data: {
           postId: Number(postId),
           filename: file.name,
