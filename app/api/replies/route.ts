@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db"; // Adjust based on your db path
+import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { postId, content, authorId, parentId } = await req.json();
+    const { postId, parentId, content, authorId } = await req.json();
 
-    if (!content || !postId || !authorId) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    if (!postId || !content || !authorId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const reply = await prisma.reply.create({
-      data: { 
+      data: {
         content,
-        authorId: parseInt(authorId),
-        postId: parseInt(postId),
-        // If parentId is 0, null, or undefined, set to null
-        parentId: parentId ? parseInt(parentId) : null
+        postId: Number(postId),
+        authorId: Number(authorId),
+        parentId: parentId ? Number(parentId) : null,
+      },
+      include: {
+        author: { select: { username: true } },
+        votes: true,
       },
     });
 
     return NextResponse.json(reply);
   } catch (error: any) {
-    console.error("Reply API Error:", error);
+    console.error("Create reply error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

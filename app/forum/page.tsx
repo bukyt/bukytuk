@@ -7,6 +7,7 @@ export default function ForumPage() {
   const [posts, setPosts] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyTarget, setReplyTarget] = useState<{ id: number | null, name: string | null }>({ id: null, name: null });
@@ -29,12 +30,31 @@ export default function ForumPage() {
 
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    await fetch("/api/posts", {
+    const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, content, authorId: USER_ID }),
     });
-    setTitle(""); setContent("");
+    
+    if (!res.ok) return;
+    
+    const post = await res.json();
+    
+    // Upload files if any
+    if (files.length > 0) {
+      const formData = new FormData();
+      formData.append("postId", String(post.id));
+      files.forEach(file => formData.append("files", file));
+      
+      await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+    }
+    
+    setTitle(""); 
+    setContent("");
+    setFiles([]);
     fetchPosts();
   };
 
@@ -98,13 +118,25 @@ export default function ForumPage() {
   return (
     <main className="min-h-screen bg-black text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-black mb-8 border-b border-gray-900 pb-4 italic tracking-tighter">BUKYT FORUM</h1>
+        <h1 className="text-3xl font-black mb-8 border-b border-gray-900 pb-4 italic tracking-tighter">Nypeldusfoorum</h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1 order-2 md:order-1">
             <form onSubmit={handlePost} className="sticky top-8 flex flex-col gap-4 bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-2xl">
-              <h3 className="font-bold text-lg text-green-500">New Transmission</h3>
+              <h3 className="font-bold text-lg text-green-500">Post Something</h3>
               <input className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none transition-colors" value={title} onChange={e => setTitle(e.target.value)} placeholder="Subject" required />
               <textarea className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none h-32 transition-colors resize-none" value={content} onChange={e => setContent(e.target.value)} placeholder="Message content..." required />
+              <input 
+                type="file" 
+                multiple 
+                onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                className="p-2 rounded bg-black border border-gray-800 focus:border-green-500 outline-none text-gray-400 text-xs transition-colors"
+                accept="image/*,video/*,.pdf,.doc,.docx"
+              />
+              {files.length > 0 && (
+                <div className="text-xs text-green-400">
+                  {files.length} file(s) selected
+                </div>
+              )}
               <button className="p-2 bg-green-600 rounded font-bold hover:bg-green-500 text-black transition-all uppercase text-xs tracking-widest">Broadcast</button>
             </form>
           </div>
@@ -123,8 +155,55 @@ export default function ForumPage() {
             <h2 className="text-3xl font-bold mb-4 text-green-400 tracking-tight">{selectedPost.title}</h2>
             <p className="text-gray-400 text-lg mb-8 border-l-2 border-green-900 pl-4">{selectedPost.content}</p>
             
+            {/* Media Display */}
+            {selectedPost.media && selectedPost.media.length > 0 && (
+              <div className="mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedPost.media.map((m: any) => {
+                    const isImage = m.mimetype.startsWith("image/");
+                    const isVideo = m.mimetype.startsWith("video/");
+                    
+                    if (isImage) {
+                      return (
+                        <img 
+                          key={m.id}
+                          src={m.filepath} 
+                          alt={m.filename}
+                          className="max-w-full rounded border border-gray-700 hover:border-gray-500 transition-colors"
+                        />
+                      );
+                    } else if (isVideo) {
+                      return (
+                        <video 
+                          key={m.id}
+                          src={m.filepath}
+                          controls
+                          className="max-w-full rounded border border-gray-700"
+                        />
+                      );
+                    } else {
+                      return (
+                        <a
+                          key={m.id}
+                          href={m.filepath}
+                          download={m.filename}
+                          className="p-4 bg-gray-800 rounded border border-gray-700 hover:border-gray-500 transition-colors flex items-center gap-3"
+                        >
+                          <span className="text-2xl">📎</span>
+                          <div className="flex-1">
+                            <div className="font-semibold text-white text-sm truncate">{m.filename}</div>
+                            <div className="text-xs text-gray-400">{m.mimetype}</div>
+                          </div>
+                        </a>
+                      );
+                    }
+                  })}
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-4 mb-8">
-              {selectedPost.replies.filter((r: any) => !r.parentId).map((r: any) => (
+              {(selectedPost.replies ?? []).map((r: any) => (
                 <ReplyItem 
                   key={r.id} 
                   reply={r} 

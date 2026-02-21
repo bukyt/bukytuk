@@ -56,6 +56,39 @@ export default function PostCard({ post, onVote, onOpen }: PostProps) {
           {post.content}
         </p>
         
+        {/* Media Preview */}
+        {post.media && post.media.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {post.media.map((m: any) => {
+              const isImage = m.mimetype.startsWith("image/");
+              const isVideo = m.mimetype.startsWith("video/");
+              
+              if (isImage) {
+                return (
+                  <img 
+                    key={m.id}
+                    src={m.filepath} 
+                    alt={m.filename}
+                    className="h-16 w-16 object-cover rounded border border-gray-600"
+                  />
+                );
+              } else if (isVideo) {
+                return (
+                  <div key={m.id} className="h-16 w-16 bg-gray-700 rounded border border-gray-600 flex items-center justify-center">
+                    <span className="text-xs text-gray-400">▶ Video</span>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={m.id} className="h-16 w-16 bg-gray-700 rounded border border-gray-600 flex items-center justify-center text-center">
+                    <span className="text-[10px] text-gray-400">{m.filename.split('.').pop()}</span>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        )}
+        
         <div className="mt-4 flex items-center text-gray-500 text-xs font-bold gap-4">
             <div className="flex items-center gap-1 hover:bg-gray-700 p-1 rounded">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

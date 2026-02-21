@@ -1,49 +1,61 @@
-// app/api/posts/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+
+// Recursively fetch nested replies
+async function getRepliesWithNested(parentId: number | null, postId: number): Promise<any[]> {
+  const replies = await prisma.reply.findMany({
+    where: {
+      postId,
+      parentId,
+    },
+    include: {
+      author: { select: { username: true } },
+      votes: true,
+    },
+  });
+
+  // Recursively fetch replies to each reply
+  for (const reply of replies) {
+    reply.replies = await getRepliesWithNested(reply.id, postId);
+  }
+
+  return replies;
+}
 
 export async function GET() {
   try {
     const posts = await prisma.post.findMany({
-        include: {
-            author: {
-            select: { username: true } // Only get the username, not the password!
-            },
-            votes: true,
-            replies: {
-            include: {
-                author: { select: { username: true } } // Also for replies
-            }
-            }
-        },
-        orderBy: { createdAt: "desc" },
+      include: {
+        author: { select: { username: true } },
+        votes: true,
+        media: true,
+      },
     });
+
+    // Manually fetch nested replies for each post
+    for (const post of posts) {
+      post.replies = await getRepliesWithNested(null, post.id);
+    }
+
     return NextResponse.json(posts);
-  } catch (err) {
-    console.error("Fetch error:", err);
+  } catch (error) {
+    console.error("Fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch" }, { status: 500 });
   }
 }
 
-// POST new post
-// app/api/posts/route.ts
 export async function POST(req: NextRequest) {
   try {
     const { title, content, authorId } = await req.json();
-    
     const post = await prisma.post.create({
-      data: { 
-        title, 
-        content, 
-        authorId: Number(authorId) // Ensure this is a number
-      },
+      data: { title, content, authorId: Number(authorId) },
       include: {
         author: true,
-        votes: true,   // Returns [] so .reduce() doesn't crash
-        replies: true, // Returns [] so .map() doesn't crash
-      }
+        votes: true,
+        replies: true,
+        media: true,
+      },
     });
-
     return NextResponse.json(post);
   } catch (err) {
     console.error("Create post error:", err);

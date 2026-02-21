@@ -1,47 +1,38 @@
-// app/api/votes/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
     const { userId, value, postId, replyId } = await req.json();
-    const uId = parseInt(userId);
 
-    // 1. Toggle: If value is 0, delete the record
-    if (value === 0) {
-      await prisma.vote.deleteMany({
-        where: {
-          userId: uId,
-          postId: postId ? parseInt(postId) : null,
-          replyId: replyId ? parseInt(replyId) : null,
-        },
-      });
-      return NextResponse.json({ success: true });
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" }, { status: 400 });
     }
 
-    // 2. Build the where clause based on the error log's suggested names
-    let whereCondition: any = {};
+    const uId = Number(userId);
+    const val = Number(value);
+
     if (postId) {
-      // Your error log suggested "postId_userId"
-      whereCondition = { postId_userId: { userId: uId, postId: parseInt(postId) } };
-    } else if (replyId) {
-      whereCondition = { userId_replyId: { userId: uId, replyId: parseInt(replyId) } };
+      const vote = await prisma.postVote.upsert({
+        where: { userId_postId: { userId: uId, postId: Number(postId) } },
+        update: { value: val },
+        create: { userId: uId, postId: Number(postId), value: val },
+      });
+      return NextResponse.json(vote);
     }
 
-    const vote = await prisma.vote.upsert({
-      where: whereCondition,
-      update: { value: parseInt(value) },
-      create: { 
-        userId: uId, 
-        value: parseInt(value), 
-        postId: postId ? parseInt(postId) : null,
-        replyId: replyId ? parseInt(replyId) : null 
-      },
-    });
+    if (replyId) {
+      const vote = await prisma.replyVote.upsert({
+        where: { userId_replyId: { userId: uId, replyId: Number(replyId) } },
+        update: { value: val },
+        create: { userId: uId, replyId: Number(replyId), value: val },
+      });
+      return NextResponse.json(vote);
+    }
 
-    return NextResponse.json(vote);
+    return NextResponse.json({ error: "No target provided" }, { status: 400 });
   } catch (error: any) {
-    console.error("Vote Error:", error);
+    console.error("Vote API Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -6,6 +6,7 @@ services:
     volumes:
       - .:/app          # Mount current folder to container
       - /app/node_modules
+      - uploads_data:/app/public/uploads  # Persistent uploads volume
     environment:
       DATABASE_URL: postgres://postgres:postgres@db:5432/bukyt
     depends_on:
@@ -22,3 +23,4 @@ services:
 
 volumes:
   postgres_data:
+  uploads_data:
