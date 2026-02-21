@@ -11,6 +11,7 @@ export default function ForumPage() {
   const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyTarget, setReplyTarget] = useState<{ id: number | null, name: string | null }>({ id: null, name: null });
+  const [sortBy, setSortBy] = useState<"new" | "top" | "trending">("new");
 
   const USER_ID = 1; // Temporary mock
 
@@ -27,6 +28,41 @@ export default function ForumPage() {
   };
 
   useEffect(() => { fetchPosts(); }, []);
+
+  const getSortedPosts = (postsToSort: any[]) => {
+    const now = Date.now();
+    
+    if (sortBy === "new") {
+      return [...postsToSort].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    
+    if (sortBy === "top") {
+      return [...postsToSort].sort((a, b) => {
+        const scoreA = (a.votes || []).reduce((acc: number, v: any) => acc + v.value, 0);
+        const scoreB = (b.votes || []).reduce((acc: number, v: any) => acc + v.value, 0);
+        return scoreB - scoreA;
+      });
+    }
+    
+    if (sortBy === "trending") {
+      // Trending: higher score and recency matter
+      return [...postsToSort].sort((a, b) => {
+        const scoreA = (a.votes || []).reduce((acc: number, v: any) => acc + v.value, 0);
+        const scoreB = (b.votes || []).reduce((acc: number, v: any) => acc + v.value, 0);
+        
+        const ageA = (now - new Date(a.createdAt).getTime()) / (1000 * 60 * 60); // hours
+        const ageB = (now - new Date(b.createdAt).getTime()) / (1000 * 60 * 60); // hours
+        
+        // Trending score: votes / log(age + 2) to favor newer posts with votes
+        const trendingA = scoreA / Math.log(ageA + 2);
+        const trendingB = scoreB / Math.log(ageB + 2);
+        
+        return trendingB - trendingA;
+      });
+    }
+    
+    return [...postsToSort];
+  };
 
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,10 +176,44 @@ export default function ForumPage() {
               <button className="p-2 bg-green-600 rounded font-bold hover:bg-green-500 text-black transition-all uppercase text-xs tracking-widest">Broadcast</button>
             </form>
           </div>
-          <div className="md:col-span-2 order-1 md:order-2 space-y-4">
-            {posts.map(post => (
-              <PostCard key={post.id} post={post} onVote={(id, val) => handleVote(id, val, "post")} onOpen={setSelectedPost} />
-            ))}
+          <div className="md:col-span-2 order-1 md:order-2">
+            <div className="mb-4 flex gap-2 bg-gray-900 p-3 rounded-xl border border-gray-800">
+              <button
+                onClick={() => setSortBy("new")}
+                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                  sortBy === "new" 
+                    ? "bg-blue-600 text-white" 
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                }`}
+              >
+                New
+              </button>
+              <button
+                onClick={() => setSortBy("top")}
+                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                  sortBy === "top" 
+                    ? "bg-orange-600 text-white" 
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                }`}
+              >
+                Top
+              </button>
+              <button
+                onClick={() => setSortBy("trending")}
+                className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${
+                  sortBy === "trending" 
+                    ? "bg-red-600 text-white" 
+                    : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+                }`}
+              >
+                Trending
+              </button>
+            </div>
+            <div className="space-y-4">
+              {getSortedPosts(posts).map(post => (
+                <PostCard key={post.id} post={post} onVote={(id, val) => handleVote(id, val, "post")} onOpen={setSelectedPost} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
