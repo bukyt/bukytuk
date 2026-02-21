@@ -34,12 +34,23 @@ export async function POST(req: NextRequest) {
       const bytes = await file.arrayBuffer();
       await writeFile(filepath, Buffer.from(bytes));
 
+      // Determine mimetype with fallback to file extension
+      let mimetype = file.type;
+      if (!mimetype) {
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (ext === 'gif') mimetype = 'image/gif';
+        else if (ext === 'jpg' || ext === 'jpeg') mimetype = 'image/jpeg';
+        else if (ext === 'png') mimetype = 'image/png';
+        else if (ext === 'mp4') mimetype = 'video/mp4';
+        else if (ext === 'webm') mimetype = 'video/webm';
+      }
+
       // Save to database
       const media = await prisma.media.create({
         data: {
           postId: Number(postId),
           filename: file.name,
-          mimetype: file.type,
+          mimetype: mimetype,
           filepath: `/uploads/${filename}`,
         },
       });

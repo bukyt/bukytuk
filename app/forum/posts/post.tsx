@@ -58,7 +58,7 @@ export default function PostCard({ post, onVote, onOpen }: PostProps) {
         
         {/* Media Preview */}
         {post.media && post.media.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-col gap-2">
             {post.media.map((m: any) => {
               const isImage = m.mimetype.startsWith("image/");
               const isVideo = m.mimetype.startsWith("video/");
@@ -69,14 +69,16 @@ export default function PostCard({ post, onVote, onOpen }: PostProps) {
                     key={m.id}
                     src={m.filepath} 
                     alt={m.filename}
-                    className="h-16 w-16 object-cover rounded border border-gray-600"
+                    className="max-h-[33vh] w-auto object-contain rounded border border-gray-600"
                   />
                 );
               } else if (isVideo) {
                 return (
-                  <div key={m.id} className="h-16 w-16 bg-gray-700 rounded border border-gray-600 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">▶ Video</span>
-                  </div>
+                  <video 
+                    key={m.id}
+                    src={m.filepath}
+                    className="max-h-[33vh] w-auto object-contain rounded border border-gray-600"
+                  />
                 );
               } else {
                 return (

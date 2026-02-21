@@ -242,7 +242,7 @@ export default function ForumPage() {
                           key={m.id}
                           src={m.filepath} 
                           alt={m.filename}
-                          className="w-full rounded border border-gray-700 hover:border-gray-500 transition-colors"
+                          className="max-w-full max-h-[33vh] w-auto h-auto object-contain rounded border border-gray-700 hover:border-gray-500 transition-colors"
                         />
                       );
                     } else if (isVideo) {
@@ -251,7 +251,7 @@ export default function ForumPage() {
                           key={m.id}
                           src={m.filepath}
                           controls
-                          className="w-full h-auto max-h-[600px] rounded border border-gray-700 hover:border-gray-500 transition-colors"
+                          className="max-w-full max-h-[33vh] w-auto h-auto object-contain rounded border border-gray-700 hover:border-gray-500 transition-colors"
                         />
                       );
                     } else {
