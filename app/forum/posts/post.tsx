@@ -4,13 +4,13 @@ interface PostProps {
   post: any;
   onVote: (postId: number, value: number) => void;
   onOpen: (post: any) => void;
+  userId: number | null;
 }
 
-export default function PostCard({ post, onVote, onOpen }: PostProps) {
+export default function PostCard({ post, onVote, onOpen, userId }: PostProps) {
   const score = (post.votes || []).reduce((a: number, b: any) => a + b.value, 0);
   
-  // Replace '1' with your actual logged-in userId later
-  const currentUserVote = post.votes?.find((v: any) => v.userId === 1)?.value;
+  const currentUserVote = userId ? post.votes?.find((v: any) => v.userId === userId)?.value : undefined;
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-md mb-4 flex overflow-hidden hover:border-gray-500 transition-colors">

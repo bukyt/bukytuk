@@ -227,7 +227,7 @@ export default function ForumPage() {
             </div>
             <div className="space-y-4">
               {getSortedPosts(posts).map(post => (
-                <PostCard key={post.id} post={post} onVote={(id, val) => handleVote(id, val, "post")} onOpen={setSelectedPost} />
+                <PostCard key={post.id} post={post} onVote={(id, val) => handleVote(id, val, "post")} onOpen={setSelectedPost} userId={userId} />
               ))}
             </div>
           </div>
