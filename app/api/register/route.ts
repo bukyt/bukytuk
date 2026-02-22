@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   const { email, password, username } = await req.json();
@@ -28,9 +29,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // In a production app, send email with verification link
-    // For now, log the token to console
-    console.log(`Email verification link for ${email}: /verify-email?token=${verificationToken}`);
+    // Send verification email
+    await sendVerificationEmail(email, username, verificationToken);
 
     return NextResponse.json({
       id: user.id,
