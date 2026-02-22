@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,6 +60,22 @@ export default function LoginPage() {
           Login
         </button>
         {message && <p className="text-sm mt-2 text-white">{message}</p>}
+        
+        <div className="flex flex-col gap-2 mt-4 text-center">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-blue-300 hover:text-blue-100"
+          >
+            Forgot Password?
+          </Link>
+          <div className="border-t border-gray-600 my-2"></div>
+          <Link
+            href="/register"
+            className="text-sm text-green-300 hover:text-green-100"
+          >
+            Don't have an account? Register
+          </Link>
+        </div>
       </form>
     </main>
   );

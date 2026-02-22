@@ -7,15 +7,19 @@ datasource db {
 }
 
 model User {
-  id         Int         @id @default(autoincrement())
-  email      String      @unique
-  username   String      @unique
-  password   String
-  createdAt  DateTime    @default(now())
-  posts      Post[]      @relation("UserPosts")
-  replies    Reply[]     @relation("UserReplies")
-  postVotes  PostVote[]  @relation("UserPostVotes")
-  replyVotes ReplyVote[] @relation("UserReplyVotes")
+  id                Int         @id @default(autoincrement())
+  email             String      @unique
+  username          String      @unique
+  password          String
+  isEmailVerified   Boolean     @default(false)
+  verificationToken String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime    @default(now())
+  posts             Post[]      @relation("UserPosts")
+  replies           Reply[]     @relation("UserReplies")
+  postVotes         PostVote[]  @relation("UserPostVotes")
+  replyVotes        ReplyVote[] @relation("UserReplyVotes")
 }
 
 model Post {
