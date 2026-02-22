@@ -36,14 +36,14 @@ export default function ReplyItem({ reply, onVote, onSetParent, currentUserId }:
           <div className="flex items-center gap-3 bg-black/40 px-2 py-1 rounded-md border border-gray-800">
             <button 
               onClick={() => onVote(reply.id, 1, "reply")} 
-              className={`text-sm transition-colors ${userVote === 1 ? 'text-green-500' : 'text-gray-500 hover:text-gray-300'}`}
+              className={`text-sm transition-colors ${userVote === 1 ? 'text-orange-500' : 'text-gray-500 hover:text-gray-300'}`}
             >
               ▲
             </button>
             <span className="text-xs font-bold min-w-[12px] text-center">{voteScore}</span>
             <button 
               onClick={() => onVote(reply.id, -1, "reply")} 
-              className={`text-sm transition-colors ${userVote === -1 ? 'text-red-500' : 'text-gray-500 hover:text-gray-300'}`}
+              className={`text-sm transition-colors ${userVote === -1 ? 'text-blue-500' : 'text-gray-500 hover:text-gray-300'}`}
             >
               ▼
             </button>

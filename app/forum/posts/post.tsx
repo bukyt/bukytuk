@@ -21,9 +21,7 @@ export default function PostCard({ post, onVote, onOpen, userId }: PostProps) {
           className={`${currentUserVote === 1 ? 'text-orange-500' : 'text-gray-400'} hover:text-orange-500 transition-colors`}
           title="Upvote"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill={currentUserVote === 1 ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-          </svg>
+          ▲
         </button>
         
         <span className={`font-bold my-1 ${score > 0 ? 'text-orange-500' : score < 0 ? 'text-blue-500' : 'text-gray-300'}`}>
@@ -35,9 +33,7 @@ export default function PostCard({ post, onVote, onOpen, userId }: PostProps) {
           className={`${currentUserVote === -1 ? 'text-blue-500' : 'text-gray-400'} hover:text-blue-500 transition-colors`}
           title="Downvote"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill={currentUserVote === -1 ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          ▼
         </button>
       </div>
 
