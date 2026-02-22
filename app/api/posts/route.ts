@@ -10,6 +10,7 @@ async function getRepliesWithNested(parentId: number | null, postId: number): Pr
     },
     include: {
       author: { select: { username: true } },
+      votes: true,
       replies: true,
     },
   });

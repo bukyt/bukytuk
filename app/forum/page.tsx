@@ -12,8 +12,7 @@ export default function ForumPage() {
   const [replyContent, setReplyContent] = useState("");
   const [replyTarget, setReplyTarget] = useState<{ id: number | null, name: string | null }>({ id: null, name: null });
   const [sortBy, setSortBy] = useState<"new" | "top" | "trending">("new");
-
-  const USER_ID = 1; // Temporary mock
+  const [userId, setUserId] = useState<number | null>(null);
 
   const fetchPosts = async () => {
     const res = await fetch("/api/posts");
@@ -27,7 +26,18 @@ export default function ForumPage() {
     }
   };
 
-  useEffect(() => { fetchPosts(); }, []);
+  const fetchCurrentUser = async () => {
+    const res = await fetch("/api/me");
+    if (res.ok) {
+      const user = await res.json();
+      setUserId(user.id);
+    }
+  };
+
+  useEffect(() => { 
+    fetchCurrentUser();
+    fetchPosts(); 
+  }, []);
 
   const getSortedPosts = (postsToSort: any[]) => {
     const now = Date.now();
@@ -66,10 +76,11 @@ export default function ForumPage() {
 
   const handlePost = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userId) return;
     const res = await fetch("/api/posts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, authorId: USER_ID }),
+      body: JSON.stringify({ title, content, authorId: userId }),
     });
     
     if (!res.ok) return;
@@ -98,6 +109,7 @@ export default function ForumPage() {
     e.preventDefault();
     if (!selectedPost) return;
     
+    if (!userId) return;
     await fetch("/api/replies", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -105,7 +117,7 @@ export default function ForumPage() {
         postId: selectedPost.id, 
         parentId: replyTarget.id, 
         content: replyContent, 
-        authorId: USER_ID 
+        authorId: userId 
       }),
     });
     setReplyContent("");
@@ -134,14 +146,15 @@ export default function ForumPage() {
       target = allReplies.find(r => r.id === id);
     }
 
-    const existingVote = target?.votes?.find((v: any) => v.userId === USER_ID);
+    if (!userId) return;
+    const existingVote = target?.votes?.find((v: any) => v.userId === userId);
     const finalValue = existingVote?.value === value ? 0 : value;
 
     const res = await fetch("/api/votes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId: USER_ID,
+        userId: userId,
         value: finalValue,
         postId: type === "post" ? id : null,
         replyId: type === "reply" ? id : null,
@@ -282,7 +295,7 @@ export default function ForumPage() {
                   reply={r} 
                   onVote={handleVote} 
                   onSetParent={(id, name) => setReplyTarget({ id, name })} 
-                  currentUserId={USER_ID}
+                  currentUserId={userId || 0}
                 />
               ))}
             </div>
