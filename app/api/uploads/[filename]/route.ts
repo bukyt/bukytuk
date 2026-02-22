@@ -4,18 +4,17 @@ import fs from 'fs/promises';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> } // Define params as a Promise
 ) {
-  // In Next.js App Router, params is often a Promise in newer versions
-  // Using await ensures compatibility
-  const { filename } = await (params as any); 
+  // We must await the params in Next.js 15+
+  const { filename } = await params; 
+  
   const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
 
   try {
     const fileBuffer = await fs.readFile(filePath);
     const ext = path.extname(filename).toLowerCase();
 
-    // Map extensions to Mime Types
     const mimeMap: Record<string, string> = {
       '.jpg': 'image/jpeg',
       '.jpeg': 'image/jpeg',
@@ -32,12 +31,11 @@ export async function GET(
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        // Cache for 1 year so the browser doesn't keep asking for the same GIF
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
   } catch (error) {
-    console.error(`Error serving file ${filename}:`, error);
+    // If file doesn't exist, return 404
     return new NextResponse('File not found', { status: 404 });
   }
 }
