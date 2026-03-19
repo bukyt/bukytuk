@@ -1,0 +1,26 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app          # Mount current folder to container
+      - /app/node_modules
+      - uploads_data:/app/public/uploads  # Persistent uploads volume
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@db:5432/bukyt
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bukyt
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+  uploads_data:

@@ -40,6 +40,9 @@ server {
         proxy_send_timeout 120s;
         proxy_read_timeout 120s;
     }
+    location /uploads/ {
+        alias /bukytukdata/uploads/; # the folder on the host or container volume
+    }
 
     # ===============================
     # Dynamic routes / API / WebSockets
