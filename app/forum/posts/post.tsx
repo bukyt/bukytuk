@@ -56,6 +56,8 @@ export default function PostCard({ post, onVote, onOpen, userId }: PostProps) {
         {post.media && post.media.length > 0 && (
           <div className="mt-3 flex flex-col gap-2">
             {post.media.map((m: any) => {
+              console.log("MEDIA OBJECT:", m);
+              console.log("FILEPATH:", m.filepath);
               const isImage = m.mimetype.startsWith("image/");
               const isVideo = m.mimetype.startsWith("video/");
               

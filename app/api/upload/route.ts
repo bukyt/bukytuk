@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           postId: Number(postId),
           filename: file.name,
           mimetype: mimetype,
-          filepath: `/uploads/${filename}`,
+          filepath: `/api/uploads/${filename}`, // serve dynamically
         },
       });
 
